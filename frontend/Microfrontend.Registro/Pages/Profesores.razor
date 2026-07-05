@@ -28,15 +28,31 @@ else
 
     @if (_modo == Modo.Lista)
     {
+        <div class="row g-2 align-items-end mb-3">
+            <div class="col-md-6">
+                <label class="form-label mb-1">Buscar</label>
+                <input type="search" class="form-control" placeholder="Nombre o código (ID)..."
+                       value="@_busqueda" @oninput="e => _busqueda = e.Value?.ToString() ?? string.Empty" />
+            </div>
+            <div class="col-md-6 text-md-end text-muted small">
+                @_profesoresFiltrados.Count() de @_profesores.Count registro(s)
+            </div>
+        </div>
+
         <table class="table table-striped">
             <thead class="table-primary">
-                <tr><th>Nombre</th><th>Materias asignadas</th><th>Acciones</th></tr>
+                <tr><th>Código</th><th>Nombre</th><th>Materias asignadas</th><th>Acciones</th></tr>
             </thead>
             <tbody>
-                @foreach (var p in _profesores)
+                @if (!_profesoresFiltrados.Any())
+                {
+                    <tr><td colspan="4" class="text-muted text-center">No hay resultados para la búsqueda.</td></tr>
+                }
+                @foreach (var p in _profesoresFiltrados)
                 {
                     var asignadas = _materias.Where(m => m.ProfesorId == p.Id).ToList();
                     <tr>
+                        <td>@p.Id</td>
                         <td>@p.Nombre</td>
                         <td>
                             <span class="badge @(asignadas.Count == 0 ? "bg-secondary" : "bg-primary")">
@@ -85,6 +101,19 @@ else
     private bool _listo;
     private string? _mensaje;
     private string? _error;
+    private string _busqueda = string.Empty;
+
+    private IEnumerable<ProfesorModel> _profesoresFiltrados =>
+        Filtrar(_profesores, p => p.Id, p => p.Nombre);
+
+    private IEnumerable<T> Filtrar<T>(IEnumerable<T> items, Func<T, int> id, params Func<T, string>[] textos)
+    {
+        var q = _busqueda.Trim();
+        if (string.IsNullOrEmpty(q)) return items;
+        if (int.TryParse(q, out var codigo))
+            return items.Where(i => id(i) == codigo);
+        return items.Where(i => textos.Any(t => t(i).Contains(q, StringComparison.OrdinalIgnoreCase)));
+    }
 
     protected override async Task OnInitializedAsync()
     {

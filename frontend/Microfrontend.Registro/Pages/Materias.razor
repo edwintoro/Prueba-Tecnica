@@ -41,14 +41,30 @@ else
 
     @if (_modo == Modo.Lista)
     {
+        <div class="row g-2 align-items-end mb-3">
+            <div class="col-md-6">
+                <label class="form-label mb-1">Buscar</label>
+                <input type="search" class="form-control" placeholder="Nombre, profesor o código (ID)..."
+                       value="@_busqueda" @oninput="e => _busqueda = e.Value?.ToString() ?? string.Empty" />
+            </div>
+            <div class="col-md-6 text-md-end text-muted small">
+                @_materiasFiltradas.Count() de @_materias.Count registro(s)
+            </div>
+        </div>
+
         <table class="table table-striped">
             <thead class="table-primary">
-                <tr><th>Materia</th><th>Profesor</th><th>Créditos</th><th>Acciones</th></tr>
+                <tr><th>Código</th><th>Materia</th><th>Profesor</th><th>Créditos</th><th>Acciones</th></tr>
             </thead>
             <tbody>
-                @foreach (var m in _materias)
+                @if (!_materiasFiltradas.Any())
+                {
+                    <tr><td colspan="5" class="text-muted text-center">No hay resultados para la búsqueda.</td></tr>
+                }
+                @foreach (var m in _materiasFiltradas)
                 {
                     <tr>
+                        <td>@m.Id</td>
                         <td>@m.Nombre</td>
                         <td>@m.ProfesorNombre</td>
                         <td>@m.Creditos</td>
@@ -76,12 +92,14 @@ else
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Profesor</label>
+                    <input type="search" class="form-control mb-2" placeholder="Buscar profesor por nombre o código..."
+                           value="@_busquedaProfesor" @oninput="e => _busquedaProfesor = e.Value?.ToString() ?? string.Empty" />
                     <InputSelect class="form-select" @bind-Value="_form.ProfesorId">
                         <option value="0">Seleccione...</option>
-                        @foreach (var p in _profesores)
+                        @foreach (var p in ProfesoresParaFormulario)
                         {
                             var count = _materias.Count(m => m.ProfesorId == p.Id && m.Id != _editId);
-                            <option value="@p.Id">@p.Nombre (@count/2 materias)</option>
+                            <option value="@p.Id">[@p.Id] @p.Nombre (@count/2 materias)</option>
                         }
                     </InputSelect>
                 </div>
@@ -103,6 +121,32 @@ else
     private bool _listo;
     private string? _mensaje;
     private string? _error;
+    private string _busqueda = string.Empty;
+    private string _busquedaProfesor = string.Empty;
+
+    private IEnumerable<MateriaModel> _materiasFiltradas =>
+        Filtrar(_materias, m => m.Id, m => m.Nombre, m => m.ProfesorNombre);
+
+    private IEnumerable<ProfesorModel> ProfesoresParaFormulario
+    {
+        get
+        {
+            var q = _busquedaProfesor.Trim();
+            if (string.IsNullOrEmpty(q)) return _profesores;
+            if (int.TryParse(q, out var codigo))
+                return _profesores.Where(p => p.Id == codigo);
+            return _profesores.Where(p => p.Nombre.Contains(q, StringComparison.OrdinalIgnoreCase));
+        }
+    }
+
+    private IEnumerable<T> Filtrar<T>(IEnumerable<T> items, Func<T, int> id, params Func<T, string>[] textos)
+    {
+        var q = _busqueda.Trim();
+        if (string.IsNullOrEmpty(q)) return items;
+        if (int.TryParse(q, out var codigo))
+            return items.Where(i => id(i) == codigo);
+        return items.Where(i => textos.Any(t => t(i).Contains(q, StringComparison.OrdinalIgnoreCase)));
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -180,7 +224,7 @@ else
         catch (Exception ex) { _error = ex.Message; }
     }
 
-    private void Cancelar() { _modo = Modo.Lista; _editId = null; _form = new(); }
+    private void Cancelar() { _modo = Modo.Lista; _editId = null; _form = new(); _busquedaProfesor = string.Empty; }
 
     public void Dispose()
     {

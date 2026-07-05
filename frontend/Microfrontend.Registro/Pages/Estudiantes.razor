@@ -44,14 +44,30 @@ else
         }
         else
         {
+            <div class="row g-2 align-items-end mb-3">
+                <div class="col-md-6">
+                    <label class="form-label mb-1">Buscar</label>
+                    <input type="search" class="form-control" placeholder="Nombre, email o código (ID)..."
+                           value="@_busqueda" @oninput="OnBusquedaChanged" />
+                </div>
+                <div class="col-md-6 text-md-end text-muted small">
+                    @_estudiantesFiltrados.Count() de @_estudiantes.Count registro(s)
+                </div>
+            </div>
+
             <table class="table table-striped">
                 <thead class="table-primary">
-                    <tr><th>Nombre</th><th>Email</th><th>Acciones</th></tr>
+                    <tr><th>Código</th><th>Nombre</th><th>Email</th><th>Acciones</th></tr>
                 </thead>
                 <tbody>
-                    @foreach (var e in _estudiantes)
+                    @if (!_estudiantesFiltrados.Any())
+                    {
+                        <tr><td colspan="4" class="text-muted text-center">No hay resultados para la búsqueda.</td></tr>
+                    }
+                    @foreach (var e in _estudiantesFiltrados)
                     {
                         <tr>
+                            <td>@e.Id</td>
                             <td>@e.Nombre</td>
                             <td>@e.Email</td>
                             <td>
@@ -95,6 +111,25 @@ else
     private bool _listo;
     private string? _mensaje;
     private string? _error;
+    private string _busqueda = string.Empty;
+    private bool _datosCargados;
+
+    private IEnumerable<EstudianteModel> _estudiantesFiltrados =>
+        Filtrar(_estudiantes, e => e.Id, e => e.Nombre, e => e.Email);
+
+    private IEnumerable<T> Filtrar<T>(IEnumerable<T> items, Func<T, int> id, params Func<T, string>[] textos)
+    {
+        var q = _busqueda.Trim();
+        if (string.IsNullOrEmpty(q)) return items;
+        if (int.TryParse(q, out var codigo))
+            return items.Where(i => id(i) == codigo);
+        return items.Where(i => textos.Any(t => t(i).Contains(q, StringComparison.OrdinalIgnoreCase)));
+    }
+
+    private void OnBusquedaChanged(ChangeEventArgs e)
+    {
+        _busqueda = e.Value?.ToString() ?? string.Empty;
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -103,32 +138,43 @@ else
         await CargarWhenReady();
     }
 
-    private async void OnAuthChanged() => await InvokeAsync(CargarWhenReady);
+    private async void OnAuthChanged()
+    {
+        if (_datosCargados && TokenStorage.IsAuthenticated) return;
+        await InvokeAsync(CargarWhenReady);
+    }
 
     private async Task CargarWhenReady()
     {
-        _listo = false;
         for (var i = 0; i < 60 && !TokenStorage.IsAuthenticated; i++)
             await Task.Delay(100);
 
+        _listo = true;
+
         if (!TokenStorage.IsAuthenticated)
         {
-            _listo = true;
-            StateHasChanged();
+            await InvokeAsync(StateHasChanged);
             return;
         }
 
-        await Cargar();
-        _listo = true;
+        if (!_datosCargados)
+        {
+            await Cargar();
+            _datosCargados = true;
+        }
+
+        await InvokeAsync(StateHasChanged);
     }
 
     private async Task Cargar()
     {
         _loading = true;
         _error = null;
+        await InvokeAsync(StateHasChanged);
         try { _estudiantes = (await Api.GetAllAsync()).ToList(); }
         catch (Exception ex) { _error = ex.Message; }
         _loading = false;
+        await InvokeAsync(StateHasChanged);
     }
 
     private void Editar(EstudianteModel e)
@@ -156,14 +202,17 @@ else
             }
             _modo = Modo.Lista;
             await Cargar();
+            _datosCargados = true;
         }
         catch (Exception ex) { _error = ex.Message; }
+        await InvokeAsync(StateHasChanged);
     }
 
     private async Task Eliminar(int id)
     {
         try { await Api.DeleteAsync(id); await Cargar(); _mensaje = "Eliminado."; }
         catch (Exception ex) { _error = ex.Message; }
+        await InvokeAsync(StateHasChanged);
     }
 
     private void Cancelar() { _modo = Modo.Lista; _editId = null; _form = new(); }
