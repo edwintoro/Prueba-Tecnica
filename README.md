@@ -6,22 +6,6 @@ Sistema de **registro estudiantil e inscripción de materias** con arquitectura 
 
 ---
 
-## Funcionalidades implementadas
-
-| # | Requisito | Estado |
-|---|-----------|--------|
-| 1 | Registro e inicio de sesión de estudiantes | ✅ |
-| 2 | Programa de créditos (máx. 3 materias, 9 créditos) | ✅ |
-| 3 | Inscripción en materias con reglas de negocio | ✅ |
-| 4 | Ver compañeros de clase por materia | ✅ |
-| 5 | Roles **Estudiante** y **Administrador** | ✅ |
-| 6 | Admin: CRUD estudiantes, profesores y materias | ✅ |
-| 7 | Admin: asignar materias a profesores (máx. 2 por profesor) | ✅ |
-| 8 | Estudiante: ver en línea registros de otros estudiantes + materias inscritas | ✅ |
-| 9 | Catálogo limitado a **10 materias** máximo | ✅ |
-
----
-
 ## Roles y módulos
 
 ### Estudiante
