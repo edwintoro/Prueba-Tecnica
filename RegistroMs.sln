@@ -1,0 +1,161 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# 
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "registro-ms", "registro-ms", "{REGISTRO-MS-FOLDER}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "gateway", "gateway", "{GATEWAY-FOLDER}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "frontend", "frontend", "{FRONTEND-FOLDER}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedKernel", "registro-ms\BuildingBlocks\SharedKernel\SharedKernel.csproj", "{11111111-1111-1111-1111-111111111111}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Persistence.Abstractions", "registro-ms\BuildingBlocks\Persistence.Abstractions\Persistence.Abstractions.csproj", "{22222222-2222-2222-2222-222222222222}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Persistence.Infrastructure", "registro-ms\BuildingBlocks\Persistence.Infrastructure\Persistence.Infrastructure.csproj", "{33333333-3333-3333-3333-333333333333}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Estudiantes.Domain", "registro-ms\Services\Estudiantes\Estudiantes.Domain\Estudiantes.Domain.csproj", "{E1D1D1D1-E1D1-E1D1-E1D1-E1D1E1D1E1D1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Estudiantes.Application", "registro-ms\Services\Estudiantes\Estudiantes.Application\Estudiantes.Application.csproj", "{E2D2D2D2-E2D2-E2D2-E2D2-E2D2E2D2E2D2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Estudiantes.Infrastructure", "registro-ms\Services\Estudiantes\Estudiantes.Infrastructure\Estudiantes.Infrastructure.csproj", "{E3D3D3D3-E3D3-E3D3-E3D3-E3D3E3D3E3D3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Programas.Domain", "registro-ms\Services\Programas\Programas.Domain\Programas.Domain.csproj", "{P1D1D1D1-P1D1-P1D1-P1D1-P1D1P1D1P1D1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Programas.Application", "registro-ms\Services\Programas\Programas.Application\Programas.Application.csproj", "{P2D2D2D2-P2D2-P2D2-P2D2-P2D2P2D2P2D2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Programas.Infrastructure", "registro-ms\Services\Programas\Programas.Infrastructure\Programas.Infrastructure.csproj", "{P3D3D3D3-P3D3-P3D3-P3D3-P3D3P3D3P3D3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Catalogo.Domain", "registro-ms\Services\Catalogo\Catalogo.Domain\Catalogo.Domain.csproj", "{C1D1D1D1-C1D1-C1D1-C1D1-C1D1C1D1C1D1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Catalogo.Application", "registro-ms\Services\Catalogo\Catalogo.Application\Catalogo.Application.csproj", "{C2D2D2D2-C2D2-C2D2-C2D2-C2D2C2D2C2D2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Catalogo.Infrastructure", "registro-ms\Services\Catalogo\Catalogo.Infrastructure\Catalogo.Infrastructure.csproj", "{C3D3D3D3-C3D3-C3D3-C3D3-C3D3C3D3C3D3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Inscripciones.Domain", "registro-ms\Services\Inscripciones\Inscripciones.Domain\Inscripciones.Domain.csproj", "{I1D1D1D1-I1D1-I1D1-I1D1-I1D1I1D1I1D1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Inscripciones.Application", "registro-ms\Services\Inscripciones\Inscripciones.Application\Inscripciones.Application.csproj", "{I2D2D2D2-I2D2-I2D2-I2D2-I2D2I2D2I2D2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Inscripciones.Infrastructure", "registro-ms\Services\Inscripciones\Inscripciones.Infrastructure\Inscripciones.Infrastructure.csproj", "{I3D3D3D3-I3D3-I3D3-I3D3-I3D3I3D3I3D3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiGateway", "gateway\ApiGateway\ApiGateway.csproj", "{G1G1G1G1-G1G1-G1G1-G1G1-G1G1G1G1G1G1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blazor.Shared", "frontend\Blazor.Shared\Blazor.Shared.csproj", "{B0B0B0B0-B0B0-B0B0-B0B0-B0B0B0B0B0B0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegistroMs.Api", "registro-ms\RegistroMs.Api\RegistroMs.Api.csproj", "{5B2ED01E-7865-4163-A518-3F231D711C44}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microfrontend.Registro", "frontend\Microfrontend.Registro\Microfrontend.Registro.csproj", "{0953DA48-84ED-4181-9EED-A9A2991818F6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orquestador.Shell", "frontend\Orquestador.Shell\Orquestador.Shell.csproj", "{E4EC4CEA-8AE8-46F6-BF77-B5DFB2197507}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{FD36D8CC-C944-4425-9365-BE8569BB9219}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Auth", "Auth", "{2E326503-E01D-487B-9FBA-96CE2DB68114}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Auth.Domain", "registro-ms\Services\Auth\Auth.Domain\Auth.Domain.csproj", "{CEF0098E-3934-4513-97EC-7F040E9961E1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Auth.Application", "registro-ms\Services\Auth\Auth.Application\Auth.Application.csproj", "{56813CD5-C194-4901-B228-1C0F05502423}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Auth.Infrastructure", "registro-ms\Services\Auth\Auth.Infrastructure\Auth.Infrastructure.csproj", "{5B29C0B7-65BD-4DAC-A105-953B50CECAB2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microfrontend.Login", "frontend\Microfrontend.Login\Microfrontend.Login.csproj", "{C03B8855-BC52-48DF-9477-53FD737C6810}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{11111111-1111-1111-1111-111111111111}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11111111-1111-1111-1111-111111111111}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22222222-2222-2222-2222-222222222222}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22222222-2222-2222-2222-222222222222}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{33333333-3333-3333-3333-333333333333}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{33333333-3333-3333-3333-333333333333}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1D1D1D1-E1D1-E1D1-E1D1-E1D1E1D1E1D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E1D1D1D1-E1D1-E1D1-E1D1-E1D1E1D1E1D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2D2D2D2-E2D2-E2D2-E2D2-E2D2E2D2E2D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2D2D2D2-E2D2-E2D2-E2D2-E2D2E2D2E2D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E3D3D3D3-E3D3-E3D3-E3D3-E3D3E3D3E3D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E3D3D3D3-E3D3-E3D3-E3D3-E3D3E3D3E3D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{P1D1D1D1-P1D1-P1D1-P1D1-P1D1P1D1P1D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{P1D1D1D1-P1D1-P1D1-P1D1-P1D1P1D1P1D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{P2D2D2D2-P2D2-P2D2-P2D2-P2D2P2D2P2D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{P2D2D2D2-P2D2-P2D2-P2D2-P2D2P2D2P2D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{P3D3D3D3-P3D3-P3D3-P3D3-P3D3P3D3P3D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{P3D3D3D3-P3D3-P3D3-P3D3-P3D3P3D3P3D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1D1D1D1-C1D1-C1D1-C1D1-C1D1C1D1C1D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1D1D1D1-C1D1-C1D1-C1D1-C1D1C1D1C1D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C2D2D2D2-C2D2-C2D2-C2D2-C2D2C2D2C2D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C2D2D2D2-C2D2-C2D2-C2D2-C2D2C2D2C2D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3D3D3D3-C3D3-C3D3-C3D3-C3D3C3D3C3D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3D3D3D3-C3D3-C3D3-C3D3-C3D3C3D3C3D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{I1D1D1D1-I1D1-I1D1-I1D1-I1D1I1D1I1D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{I1D1D1D1-I1D1-I1D1-I1D1-I1D1I1D1I1D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{I2D2D2D2-I2D2-I2D2-I2D2-I2D2I2D2I2D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{I2D2D2D2-I2D2-I2D2-I2D2-I2D2I2D2I2D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{I3D3D3D3-I3D3-I3D3-I3D3-I3D3I3D3I3D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{I3D3D3D3-I3D3-I3D3-I3D3-I3D3I3D3I3D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{G1G1G1G1-G1G1-G1G1-G1G1-G1G1G1G1G1G1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{G1G1G1G1-G1G1-G1G1-G1G1-G1G1G1G1G1G1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B0B0B0B0-B0B0-B0B0-B0B0-B0B0B0B0B0B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0B0B0B0-B0B0-B0B0-B0B0-B0B0B0B0B0B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B2ED01E-7865-4163-A518-3F231D711C44}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B2ED01E-7865-4163-A518-3F231D711C44}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B2ED01E-7865-4163-A518-3F231D711C44}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B2ED01E-7865-4163-A518-3F231D711C44}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0953DA48-84ED-4181-9EED-A9A2991818F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0953DA48-84ED-4181-9EED-A9A2991818F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0953DA48-84ED-4181-9EED-A9A2991818F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0953DA48-84ED-4181-9EED-A9A2991818F6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E4EC4CEA-8AE8-46F6-BF77-B5DFB2197507}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E4EC4CEA-8AE8-46F6-BF77-B5DFB2197507}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E4EC4CEA-8AE8-46F6-BF77-B5DFB2197507}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E4EC4CEA-8AE8-46F6-BF77-B5DFB2197507}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CEF0098E-3934-4513-97EC-7F040E9961E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CEF0098E-3934-4513-97EC-7F040E9961E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CEF0098E-3934-4513-97EC-7F040E9961E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CEF0098E-3934-4513-97EC-7F040E9961E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{56813CD5-C194-4901-B228-1C0F05502423}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{56813CD5-C194-4901-B228-1C0F05502423}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{56813CD5-C194-4901-B228-1C0F05502423}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{56813CD5-C194-4901-B228-1C0F05502423}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5B29C0B7-65BD-4DAC-A105-953B50CECAB2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B29C0B7-65BD-4DAC-A105-953B50CECAB2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B29C0B7-65BD-4DAC-A105-953B50CECAB2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B29C0B7-65BD-4DAC-A105-953B50CECAB2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C03B8855-BC52-48DF-9477-53FD737C6810}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C03B8855-BC52-48DF-9477-53FD737C6810}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C03B8855-BC52-48DF-9477-53FD737C6810}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C03B8855-BC52-48DF-9477-53FD737C6810}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{11111111-1111-1111-1111-111111111111} = {REGISTRO-MS-FOLDER}
+		{22222222-2222-2222-2222-222222222222} = {REGISTRO-MS-FOLDER}
+		{33333333-3333-3333-3333-333333333333} = {REGISTRO-MS-FOLDER}
+		{E1D1D1D1-E1D1-E1D1-E1D1-E1D1E1D1E1D1} = {REGISTRO-MS-FOLDER}
+		{E2D2D2D2-E2D2-E2D2-E2D2-E2D2E2D2E2D2} = {REGISTRO-MS-FOLDER}
+		{E3D3D3D3-E3D3-E3D3-E3D3-E3D3E3D3E3D3} = {REGISTRO-MS-FOLDER}
+		{P1D1D1D1-P1D1-P1D1-P1D1-P1D1P1D1P1D1} = {REGISTRO-MS-FOLDER}
+		{P2D2D2D2-P2D2-P2D2-P2D2-P2D2P2D2P2D2} = {REGISTRO-MS-FOLDER}
+		{P3D3D3D3-P3D3-P3D3-P3D3-P3D3P3D3P3D3} = {REGISTRO-MS-FOLDER}
+		{C1D1D1D1-C1D1-C1D1-C1D1-C1D1C1D1C1D1} = {REGISTRO-MS-FOLDER}
+		{C2D2D2D2-C2D2-C2D2-C2D2-C2D2C2D2C2D2} = {REGISTRO-MS-FOLDER}
+		{C3D3D3D3-C3D3-C3D3-C3D3-C3D3C3D3C3D3} = {REGISTRO-MS-FOLDER}
+		{I1D1D1D1-I1D1-I1D1-I1D1-I1D1I1D1I1D1} = {REGISTRO-MS-FOLDER}
+		{I2D2D2D2-I2D2-I2D2-I2D2-I2D2I2D2I2D2} = {REGISTRO-MS-FOLDER}
+		{I3D3D3D3-I3D3-I3D3-I3D3-I3D3I3D3I3D3} = {REGISTRO-MS-FOLDER}
+		{G1G1G1G1-G1G1-G1G1-G1G1-G1G1G1G1G1G1} = {GATEWAY-FOLDER}
+		{B0B0B0B0-B0B0-B0B0-B0B0-B0B0B0B0B0B0} = {FRONTEND-FOLDER}
+		{5B2ED01E-7865-4163-A518-3F231D711C44} = {REGISTRO-MS-FOLDER}
+		{0953DA48-84ED-4181-9EED-A9A2991818F6} = {FRONTEND-FOLDER}
+		{E4EC4CEA-8AE8-46F6-BF77-B5DFB2197507} = {FRONTEND-FOLDER}
+		{FD36D8CC-C944-4425-9365-BE8569BB9219} = {REGISTRO-MS-FOLDER}
+		{2E326503-E01D-487B-9FBA-96CE2DB68114} = {FD36D8CC-C944-4425-9365-BE8569BB9219}
+		{CEF0098E-3934-4513-97EC-7F040E9961E1} = {2E326503-E01D-487B-9FBA-96CE2DB68114}
+		{56813CD5-C194-4901-B228-1C0F05502423} = {2E326503-E01D-487B-9FBA-96CE2DB68114}
+		{5B29C0B7-65BD-4DAC-A105-953B50CECAB2} = {2E326503-E01D-487B-9FBA-96CE2DB68114}
+		{C03B8855-BC52-48DF-9477-53FD737C6810} = {FRONTEND-FOLDER}
+	EndGlobalSection
+EndGlobal

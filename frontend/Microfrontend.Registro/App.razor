@@ -1,0 +1,27 @@
+@inject AuthBridgeService AuthBridge
+@inject IJSRuntime JS
+
+@if (!_ready)
+{
+    <p class="p-3 text-muted">Inicializando sesión...</p>
+}
+else
+{
+    <Router AppAssembly="@typeof(App).Assembly">
+        <Found Context="routeData">
+            <RouteView RouteData="@routeData" DefaultLayout="@typeof(EmptyLayout)" />
+        </Found>
+    </Router>
+}
+
+@code {
+    private bool _ready;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _ready) return;
+        await AuthBridge.InitializeAsync(JS);
+        _ready = true;
+        StateHasChanged();
+    }
+}

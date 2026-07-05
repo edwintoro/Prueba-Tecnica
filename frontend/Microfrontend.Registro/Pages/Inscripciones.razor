@@ -1,0 +1,200 @@
+@page "/inscripciones"
+@inject IProgramasApiClient ProgramasApi
+@inject ICatalogoApiClient CatalogoApi
+@inject IInscripcionesApiClient InscripcionesApi
+@inject ITokenStorage TokenStorage
+@inject AuthBridgeService AuthBridge
+@implements IDisposable
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h2 class="mb-0">Inscripciones — Programa de Créditos</h2>
+    <a href="/home" target="_top" class="btn btn-outline-secondary">← Volver</a>
+</div>
+
+@if (!string.IsNullOrEmpty(_mensaje)) { <div class="alert alert-success">@_mensaje</div> }
+@if (!string.IsNullOrEmpty(_error)) { <div class="alert alert-danger">@_error</div> }
+
+@if (!_listo)
+{
+    <p>Cargando sesión...</p>
+}
+else if (!TokenStorage.IsAuthenticated || _estudianteId <= 0)
+{
+    <div class="alert alert-info">Cargando datos...</div>
+}
+else if (!AppRoles.IsEstudiante(TokenStorage.Current?.Rol))
+{
+    <div class="alert alert-warning">Acceso restringido a estudiantes.</div>
+}
+else
+{
+    <p class="text-muted mb-3">
+        <strong>Nota:</strong> debes escoger máximo 3 materias (9 créditos en total).
+    </p>
+
+    @if (_programa is not null && _adhesion is not null && !_adhesion.EstaAdherido)
+    {
+        <button class="btn btn-success mb-3" @onclick="Adherir">Adherirse al Programa de Créditos</button>
+    }
+    @if (_adhesion?.EstaAdherido == true)
+    {
+        <span class="badge bg-success mb-3">Adherido al programa</span>
+    }
+
+    @if (_adhesion?.EstaAdherido == true && _programa is not null)
+    {
+        <p>Progreso: @_inscripciones.Count / @_programa.MaxMaterias materias — @_creditos / @_programa.TotalCreditos créditos</p>
+
+        @if (_inscripciones.Any())
+        {
+            <h5>Materias Inscritas</h5>
+            <ul class="list-group mb-3">
+                @foreach (var i in _inscripciones)
+                {
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>@i.MateriaNombre — @i.ProfesorNombre</span>
+                        <span>
+                            <button class="btn btn-sm btn-info me-1" @onclick="() => VerCompaneros(i.MateriaId)">Compañeros</button>
+                            <button class="btn btn-sm btn-danger" @onclick="() => Cancelar(i.Id)">Cancelar</button>
+                        </span>
+                    </li>
+                }
+            </ul>
+        }
+
+        <h5>Materias Disponibles</h5>
+        <table class="table table-striped">
+            <thead><tr><th>Materia</th><th>Profesor</th><th>Créditos</th><th></th></tr></thead>
+            <tbody>
+                @foreach (var m in _materias)
+                {
+                    var inscrita = _inscripciones.Any(i => i.MateriaId == m.Id);
+                    var bloqueada = !inscrita && (
+                        _inscripciones.Count >= _programa.MaxMaterias ||
+                        _profesoresInscritos.Contains(m.ProfesorId));
+                    <tr class="@(inscrita ? "table-success" : bloqueada ? "table-secondary" : "")">
+                        <td>@m.Nombre</td>
+                        <td>@m.ProfesorNombre</td>
+                        <td>@m.Creditos</td>
+                        <td>
+                            @if (!inscrita && !bloqueada)
+                            {
+                                <button class="btn btn-sm btn-primary" @onclick="() => Inscribir(m.Id)">Inscribir</button>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}
+
+@if (_companeros.Any())
+{
+    <div class="alert alert-info mt-3">
+        <strong>Compañeros de clase:</strong> @string.Join(", ", _companeros)
+    </div>
+}
+
+@code {
+    private List<MateriaModel> _materias = [];
+    private List<InscripcionModel> _inscripciones = [];
+    private HashSet<int> _profesoresInscritos = [];
+    private ProgramaModel? _programa;
+    private AdhesionModel? _adhesion;
+    private int _estudianteId;
+    private int _creditos;
+    private string? _mensaje;
+    private string? _error;
+    private List<string> _companeros = [];
+    private bool _listo;
+
+    protected override async Task OnInitializedAsync()
+    {
+        TokenStorage.Changed += OnAuthChanged;
+        AuthBridge.Ready += OnAuthChanged;
+        await CargarDatosAsync();
+    }
+
+    private async void OnAuthChanged() => await InvokeAsync(CargarDatosAsync);
+
+    private async Task CargarDatosAsync()
+    {
+        _listo = false;
+        _error = null;
+
+        for (var i = 0; i < 60 && !TokenStorage.IsAuthenticated; i++)
+            await Task.Delay(100);
+
+        _estudianteId = TokenStorage.Current?.EstudianteId ?? 0;
+
+        if (!TokenStorage.IsAuthenticated || _estudianteId <= 0)
+        {
+            _listo = true;
+            StateHasChanged();
+            return;
+        }
+
+        if (!AppRoles.IsEstudiante(TokenStorage.Current?.Rol))
+        {
+            _listo = true;
+            StateHasChanged();
+            return;
+        }
+
+        try
+        {
+            _materias = (await CatalogoApi.GetMateriasAsync()).ToList();
+            _programa = await ProgramasApi.GetActivoAsync();
+            await RecargarInscripcionesAsync();
+        }
+        catch (Exception ex) { _error = ex.Message; }
+
+        _listo = true;
+        StateHasChanged();
+    }
+
+    private async Task RecargarInscripcionesAsync()
+    {
+        _companeros = [];
+        _adhesion = await ProgramasApi.GetAdhesionAsync(_estudianteId);
+        _inscripciones = (await InscripcionesApi.GetByEstudianteAsync(_estudianteId)).ToList();
+        _profesoresInscritos = _inscripciones.Select(i => i.ProfesorId).ToHashSet();
+        _creditos = _inscripciones.Sum(i => i.Creditos);
+    }
+
+    private async Task Adherir()
+    {
+        if (_programa is null) return;
+        var ok = await ProgramasApi.AdherirAsync(new AdherirRequest(_estudianteId, _programa.Id));
+        _mensaje = ok ? "Adherido al programa de créditos." : "Error al adherir.";
+        _error = ok ? null : "No se pudo adherir al programa.";
+        await RecargarInscripcionesAsync();
+    }
+
+    private async Task Inscribir(int materiaId)
+    {
+        var ok = await InscripcionesApi.InscribirAsync(new InscribirRequest(_estudianteId, materiaId));
+        _mensaje = ok ? "Inscripción exitosa." : "No se pudo inscribir (revise reglas).";
+        _error = ok ? null : "Violación de regla de negocio.";
+        await RecargarInscripcionesAsync();
+    }
+
+    private async Task Cancelar(int id)
+    {
+        await InscripcionesApi.CancelarAsync(id);
+        _mensaje = "Inscripción cancelada.";
+        await RecargarInscripcionesAsync();
+    }
+
+    private async Task VerCompaneros(int materiaId)
+    {
+        _companeros = (await InscripcionesApi.GetCompanerosAsync(materiaId, _estudianteId)).ToList();
+    }
+
+    public void Dispose()
+    {
+        TokenStorage.Changed -= OnAuthChanged;
+        AuthBridge.Ready -= OnAuthChanged;
+    }
+}

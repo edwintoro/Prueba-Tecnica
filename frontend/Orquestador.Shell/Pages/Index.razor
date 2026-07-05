@@ -1,0 +1,93 @@
+@page "/home"
+@inject ShellAuthService Auth
+@inject NavigationManager Nav
+
+<PageTitle>Registro Estudiantes</PageTitle>
+
+@if (!_ready)
+{
+    <p>Verificando sesión...</p>
+}
+else if (!_authenticated)
+{
+    <p>Redirigiendo al login...</p>
+}
+else
+{
+    <div class="text-center py-4">
+        <h1 class="display-5 text-primary">Sistema de Registro Estudiantil</h1>
+        <p class="lead">@(_isAdmin ? "Panel de administración académica" : "Programa de créditos e inscripción de materias")</p>
+        <div class="row g-4 justify-content-center mt-4">
+            @if (_isAdmin)
+            {
+                <div class="col-md-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body">
+                            <h4>Registro Estudiantil</h4>
+                            <p>Crear, editar y eliminar estudiantes</p>
+                            <a href="/estudiantes" class="btn btn-primary">Abrir Registro</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body">
+                            <h4>Materias</h4>
+                            <p>Asignar materias a profesores (máx. 2 por profesor)</p>
+                            <a href="/materias" class="btn btn-info text-white">Gestionar Materias</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body">
+                            <h4>Profesores</h4>
+                            <p>Crear, editar y eliminar profesores</p>
+                            <a href="/profesores" class="btn btn-secondary">Gestionar Profesores</a>
+                        </div>
+                    </div>
+                </div>
+            }
+            @if (_isEstudiante)
+            {
+                <div class="col-md-6">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body">
+                            <h4>Directorio de Estudiantes</h4>
+                            <p>Consulta registros y materias inscritas de otros estudiantes</p>
+                            <a href="/directorio-estudiantes" class="btn btn-primary">Ver Directorio</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body">
+                            <h4>Inscripciones</h4>
+                            <p>Inscríbete en materias del programa de créditos</p>
+                            <a href="/inscripciones" class="btn btn-success">Abrir Inscripciones</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    private bool _ready;
+    private bool _authenticated;
+    private bool _isAdmin;
+    private bool _isEstudiante;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _ready) return;
+        _authenticated = await Auth.IsAuthenticatedAsync();
+        _isAdmin = Auth.IsAdministrador();
+        _isEstudiante = Auth.IsEstudiante();
+        _ready = true;
+        if (!_authenticated)
+            Nav.NavigateTo("/", replace: true);
+        StateHasChanged();
+    }
+}

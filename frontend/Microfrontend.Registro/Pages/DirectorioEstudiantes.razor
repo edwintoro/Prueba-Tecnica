@@ -1,0 +1,135 @@
+@page "/directorio-estudiantes"
+@inject IEstudiantesApiClient Api
+@inject IInscripcionesApiClient InscripcionesApi
+@inject ITokenStorage TokenStorage
+@inject AuthBridgeService AuthBridge
+@implements IDisposable
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h2 class="mb-0">Directorio de Estudiantes</h2>
+    <a href="/home" target="_top" class="btn btn-outline-secondary">← Volver</a>
+</div>
+
+<p class="text-muted">Consulta en línea los registros de estudiantes y las materias en las que están inscritos.</p>
+
+@if (!string.IsNullOrEmpty(_error))
+{
+    <div class="alert alert-danger">@_error</div>
+}
+
+@if (!_listo)
+{
+    <p>Cargando...</p>
+}
+else if (!TokenStorage.IsAuthenticated)
+{
+    <div class="alert alert-warning">Esperando autenticación del sistema...</div>
+}
+else if (!AppRoles.IsEstudiante(TokenStorage.Current?.Rol))
+{
+    <div class="alert alert-warning">Acceso restringido a estudiantes.</div>
+}
+else if (_loading)
+{
+    <p>Cargando registros...</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead class="table-primary">
+            <tr>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Materias inscritas</th>
+                <th>Fecha de registro</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var e in _estudiantes)
+            {
+                var materias = _materiasPorEstudiante.GetValueOrDefault(e.Id) ?? [];
+                <tr class="@(e.Id == _miEstudianteId ? "table-info" : "")">
+                    <td>
+                        @e.Nombre
+                        @if (e.Id == _miEstudianteId)
+                        {
+                            <span class="badge bg-primary ms-1">Tú</span>
+                        }
+                    </td>
+                    <td>@e.Email</td>
+                    <td>
+                        @if (materias.Count == 0)
+                        {
+                            <span class="text-muted">0</span>
+                        }
+                        else
+                        {
+                            @string.Join(", ", materias)
+                        }
+                    </td>
+                    <td>@e.FechaRegistro.ToString("dd/MM/yyyy")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <p class="text-muted small">Total: @_estudiantes.Count estudiante(s) registrado(s).</p>
+}
+
+@code {
+    private List<EstudianteModel> _estudiantes = [];
+    private Dictionary<int, List<string>> _materiasPorEstudiante = [];
+    private int? _miEstudianteId;
+    private bool _loading;
+    private bool _listo;
+    private string? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        TokenStorage.Changed += OnAuthChanged;
+        AuthBridge.Ready += OnAuthChanged;
+        await CargarAsync();
+    }
+
+    private async void OnAuthChanged() => await InvokeAsync(CargarAsync);
+
+    private async Task CargarAsync()
+    {
+        _listo = false;
+        for (var i = 0; i < 60 && !TokenStorage.IsAuthenticated; i++)
+            await Task.Delay(100);
+
+        if (!AppRoles.IsEstudiante(TokenStorage.Current?.Rol))
+        {
+            _listo = true;
+            StateHasChanged();
+            return;
+        }
+
+        _miEstudianteId = TokenStorage.Current?.EstudianteId;
+        _loading = true;
+        _error = null;
+        try
+        {
+            _estudiantes = (await Api.GetAllAsync()).OrderBy(e => e.Nombre).ToList();
+            _materiasPorEstudiante = [];
+
+            var tareas = _estudiantes.Select(async e =>
+            {
+                var inscripciones = await InscripcionesApi.GetByEstudianteAsync(e.Id);
+                return (e.Id, inscripciones.Select(i => i.MateriaNombre).ToList());
+            });
+            foreach (var (id, nombres) in await Task.WhenAll(tareas))
+                _materiasPorEstudiante[id] = nombres;
+        }
+        catch (Exception ex) { _error = ex.Message; }
+
+        _loading = false;
+        _listo = true;
+    }
+
+    public void Dispose()
+    {
+        TokenStorage.Changed -= OnAuthChanged;
+        AuthBridge.Ready -= OnAuthChanged;
+    }
+}

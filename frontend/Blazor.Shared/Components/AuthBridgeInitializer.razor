@@ -1,0 +1,10 @@
+@inject AuthBridgeService AuthBridge
+@inject IJSRuntime JS
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        await AuthBridge.InitializeAsync(JS);
+    }
+}

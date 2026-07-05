@@ -1,0 +1,62 @@
+@page "/materias"
+@inject IOptions<MicrofrontendOptions> MfOptions
+@inject ShellAuthService Auth
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+
+<PageTitle>Materias</PageTitle>
+
+@if (!_ready)
+{
+    <p>Verificando sesión...</p>
+}
+else if (!_authenticated)
+{
+    <p>Redirigiendo al login...</p>
+}
+else
+{
+    <div class="mb-3">
+        <a href="/home" class="btn btn-outline-secondary btn-sm">← Volver al inicio</a>
+    </div>
+    <iframe src="@_mfUrl"
+            class="mf-frame"
+            title="Materias"></iframe>
+}
+
+@code {
+    private bool _ready;
+    private bool _authenticated;
+    private string? _mfUrl;
+    private int _relayAttempts;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!_ready)
+        {
+            if (!firstRender) return;
+            await Auth.EnsureRelayAsync();
+            _authenticated = await Auth.IsAuthenticatedAsync();
+            if (!_authenticated)
+            {
+                Nav.NavigateTo("/");
+                return;
+            }
+            if (!Auth.IsAdministrador())
+            {
+                Nav.NavigateTo("/home", replace: true);
+                return;
+            }
+            _mfUrl = await Auth.BuildMfUrlAsync(MfOptions.Value.RegistroUrl, "materias");
+            _ready = true;
+            StateHasChanged();
+            return;
+        }
+
+        if (_authenticated && _relayAttempts < 3)
+        {
+            _relayAttempts++;
+            await JS.InvokeVoidAsync("shellAuth.relayAllFrames");
+        }
+    }
+}

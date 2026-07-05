@@ -1,0 +1,90 @@
+@inherits LayoutComponentBase
+@inject ShellAuthService Auth
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+@implements IDisposable
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/home">Registro Estudiantes</a>
+        <div class="navbar-nav ms-auto align-items-lg-center">
+            @if (_authenticated)
+            {
+                <a class="nav-link" href="/home">Inicio</a>
+                @if (_isAdmin)
+                {
+                    <a class="nav-link" href="/estudiantes">Registro</a>
+                    <a class="nav-link" href="/materias">Materias</a>
+                    <a class="nav-link" href="/profesores">Profesores</a>
+                }
+                @if (_isEstudiante)
+                {
+                    <a class="nav-link" href="/directorio-estudiantes">Directorio</a>
+                    <a class="nav-link" href="/inscripciones">Inscripciones</a>
+                }
+                <span class="badge bg-light text-primary ms-lg-2">@_rolDisplay</span>
+                <span class="navbar-text text-white-50 ms-lg-2 me-2">@_nombre</span>
+                <button class="btn btn-outline-light btn-sm" @onclick="CerrarSesion">Salir</button>
+            }
+        </div>
+    </div>
+</nav>
+
+<main class="container py-4">
+    @Body
+</main>
+
+@code {
+    private string? _nombre;
+    private string? _rolDisplay;
+    private bool _authenticated;
+    private bool _isAdmin;
+    private bool _isEstudiante;
+    private bool _initialized;
+    private DotNetObjectReference<MainLayout>? _ref;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _initialized) return;
+        _initialized = true;
+        await Auth.EnsureRelayAsync();
+        _ref = DotNetObjectReference.Create(this);
+        await JS.InvokeVoidAsync("shellAuth.onLogoutMessage", _ref);
+        await EnsureAuthenticatedAsync();
+    }
+
+    private async Task EnsureAuthenticatedAsync()
+    {
+        _authenticated = await Auth.IsAuthenticatedAsync();
+        if (!_authenticated)
+        {
+            Nav.NavigateTo("/", replace: true);
+            return;
+        }
+
+        _isAdmin = Auth.IsAdministrador();
+        _isEstudiante = Auth.IsEstudiante();
+        _rolDisplay = AppRoles.Display(Auth.Rol);
+        _nombre = Auth.Session?.Nombre ?? Auth.Session?.EstudianteId?.ToString();
+        StateHasChanged();
+    }
+
+    [JSInvokable]
+    public async Task OnLoggedOut()
+    {
+        await Auth.ClearAsync();
+        _authenticated = false;
+        _nombre = null;
+        Nav.NavigateTo("/", forceLoad: true);
+    }
+
+    private async Task CerrarSesion()
+    {
+        await Auth.ClearAsync();
+        _authenticated = false;
+        _nombre = null;
+        Nav.NavigateTo("/", forceLoad: true);
+    }
+
+    public void Dispose() => _ref?.Dispose();
+}

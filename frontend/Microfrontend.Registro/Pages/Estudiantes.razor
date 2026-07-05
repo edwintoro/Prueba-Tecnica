@@ -1,0 +1,182 @@
+@page "/estudiantes"
+@inject IEstudiantesApiClient Api
+@inject ITokenStorage TokenStorage
+@inject AuthBridgeService AuthBridge
+@implements IDisposable
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h2 class="mb-0">Estudiantes — Registro</h2>
+    <a href="/home" target="_top" class="btn btn-outline-secondary">← Volver</a>
+</div>
+
+@if (!string.IsNullOrEmpty(_mensaje))
+{
+    <div class="alert alert-success">@_mensaje</div>
+}
+@if (!string.IsNullOrEmpty(_error))
+{
+    <div class="alert alert-danger">@_error</div>
+}
+
+@if (!_listo)
+{
+    <p>Cargando sesión...</p>
+}
+else if (!TokenStorage.IsAuthenticated)
+{
+    <div class="alert alert-warning">Esperando autenticación del sistema...</div>
+}
+else if (!AppRoles.IsAdministrador(TokenStorage.Current?.Rol))
+{
+    <div class="alert alert-warning">Acceso restringido a administradores.</div>
+}
+else
+{
+    <div class="d-flex justify-content-end mb-3">
+        <button class="btn btn-primary" @onclick="() => _modo = Modo.Crear">+ Nuevo Estudiante</button>
+    </div>
+
+    @if (_modo == Modo.Lista)
+    {
+        @if (_loading)
+        {
+            <p>Cargando...</p>
+        }
+        else
+        {
+            <table class="table table-striped">
+                <thead class="table-primary">
+                    <tr><th>Nombre</th><th>Email</th><th>Acciones</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var e in _estudiantes)
+                    {
+                        <tr>
+                            <td>@e.Nombre</td>
+                            <td>@e.Email</td>
+                            <td>
+                                <button class="btn btn-sm btn-secondary me-1" @onclick="() => Editar(e)">Editar</button>
+                                <button class="btn btn-sm btn-danger" @onclick="() => Eliminar(e.Id)">Eliminar</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    }
+    else
+    {
+        <div class="col-md-6">
+            <h4>@(_modo == Modo.Crear ? "Nuevo" : "Editar") Estudiante</h4>
+            <EditForm Model="_form" OnValidSubmit="Guardar">
+                <div class="mb-3">
+                    <label class="form-label">Nombre</label>
+                    <InputText class="form-control" @bind-Value="_form.Nombre" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <InputText class="form-control" @bind-Value="_form.Email" />
+                </div>
+                <button type="submit" class="btn btn-primary">Guardar</button>
+                <button type="button" class="btn btn-secondary ms-2" @onclick="Cancelar">Cancelar</button>
+            </EditForm>
+        </div>
+    }
+}
+
+@code {
+    private enum Modo { Lista, Crear, Editar }
+
+    private Modo _modo = Modo.Lista;
+    private List<EstudianteModel> _estudiantes = [];
+    private FormModel _form = new();
+    private int? _editId;
+    private bool _loading;
+    private bool _listo;
+    private string? _mensaje;
+    private string? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        TokenStorage.Changed += OnAuthChanged;
+        AuthBridge.Ready += OnAuthChanged;
+        await CargarWhenReady();
+    }
+
+    private async void OnAuthChanged() => await InvokeAsync(CargarWhenReady);
+
+    private async Task CargarWhenReady()
+    {
+        _listo = false;
+        for (var i = 0; i < 60 && !TokenStorage.IsAuthenticated; i++)
+            await Task.Delay(100);
+
+        if (!TokenStorage.IsAuthenticated)
+        {
+            _listo = true;
+            StateHasChanged();
+            return;
+        }
+
+        await Cargar();
+        _listo = true;
+    }
+
+    private async Task Cargar()
+    {
+        _loading = true;
+        _error = null;
+        try { _estudiantes = (await Api.GetAllAsync()).ToList(); }
+        catch (Exception ex) { _error = ex.Message; }
+        _loading = false;
+    }
+
+    private void Editar(EstudianteModel e)
+    {
+        _editId = e.Id;
+        _form = new FormModel { Nombre = e.Nombre, Email = e.Email };
+        _modo = Modo.Editar;
+    }
+
+    private async Task Guardar()
+    {
+        _error = null;
+        try
+        {
+            if (_modo == Modo.Crear)
+            {
+                var creado = await Api.CreateAsync(new CreateEstudianteModel(_form.Nombre, _form.Email));
+                if (creado is null) { _error = "No se pudo crear el estudiante."; return; }
+                _mensaje = $"Estudiante registrado (ID: {creado.Id}).";
+            }
+            else if (_editId.HasValue)
+            {
+                await Api.UpdateAsync(_editId.Value, new UpdateEstudianteModel(_form.Nombre, _form.Email));
+                _mensaje = "Estudiante actualizado.";
+            }
+            _modo = Modo.Lista;
+            await Cargar();
+        }
+        catch (Exception ex) { _error = ex.Message; }
+    }
+
+    private async Task Eliminar(int id)
+    {
+        try { await Api.DeleteAsync(id); await Cargar(); _mensaje = "Eliminado."; }
+        catch (Exception ex) { _error = ex.Message; }
+    }
+
+    private void Cancelar() { _modo = Modo.Lista; _editId = null; _form = new(); }
+
+    public void Dispose()
+    {
+        TokenStorage.Changed -= OnAuthChanged;
+        AuthBridge.Ready -= OnAuthChanged;
+    }
+
+    private sealed class FormModel
+    {
+        public string Nombre { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+    }
+}

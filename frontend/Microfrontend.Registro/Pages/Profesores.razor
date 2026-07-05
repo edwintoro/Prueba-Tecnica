@@ -1,0 +1,175 @@
+@page "/profesores"
+@inject ICatalogoApiClient Catalogo
+@inject ITokenStorage TokenStorage
+@inject AuthBridgeService AuthBridge
+@implements IDisposable
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h2 class="mb-0">Profesores — Administración</h2>
+    <a href="/home" target="_top" class="btn btn-outline-secondary">← Volver</a>
+</div>
+
+@if (!string.IsNullOrEmpty(_mensaje)) { <div class="alert alert-success">@_mensaje</div> }
+@if (!string.IsNullOrEmpty(_error)) { <div class="alert alert-danger">@_error</div> }
+
+@if (!_listo)
+{
+    <p>Cargando...</p>
+}
+else if (!AppRoles.IsAdministrador(TokenStorage.Current?.Rol))
+{
+    <div class="alert alert-warning">Acceso restringido a administradores.</div>
+}
+else
+{
+    <div class="d-flex justify-content-end mb-3">
+        <button class="btn btn-primary" @onclick="() => _modo = Modo.Crear">+ Nuevo Profesor</button>
+    </div>
+
+    @if (_modo == Modo.Lista)
+    {
+        <table class="table table-striped">
+            <thead class="table-primary">
+                <tr><th>Nombre</th><th>Materias asignadas</th><th>Acciones</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var p in _profesores)
+                {
+                    var asignadas = _materias.Where(m => m.ProfesorId == p.Id).ToList();
+                    <tr>
+                        <td>@p.Nombre</td>
+                        <td>
+                            <span class="badge @(asignadas.Count == 0 ? "bg-secondary" : "bg-primary")">
+                                @asignadas.Count / 2
+                            </span>
+                            @if (asignadas.Count > 0)
+                            {
+                                <div class="small text-muted mt-1">
+                                    @string.Join(", ", asignadas.Select(m => m.Nombre))
+                                </div>
+                            }
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-secondary me-1" @onclick="() => Editar(p)">Editar</button>
+                            <button class="btn btn-sm btn-danger" @onclick="() => Eliminar(p.Id)" disabled="@(asignadas.Count > 0)">Eliminar</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="col-md-6">
+            <h4>@(_modo == Modo.Crear ? "Nuevo" : "Editar") Profesor</h4>
+            <EditForm Model="_form" OnValidSubmit="Guardar">
+                <div class="mb-3">
+                    <label class="form-label">Nombre</label>
+                    <InputText class="form-control" @bind-Value="_form.Nombre" />
+                </div>
+                <button type="submit" class="btn btn-primary">Guardar</button>
+                <button type="button" class="btn btn-secondary ms-2" @onclick="Cancelar">Cancelar</button>
+            </EditForm>
+        </div>
+    }
+}
+
+@code {
+    private enum Modo { Lista, Crear, Editar }
+
+    private Modo _modo = Modo.Lista;
+    private List<ProfesorModel> _profesores = [];
+    private List<MateriaModel> _materias = [];
+    private FormModel _form = new();
+    private int? _editId;
+    private bool _listo;
+    private string? _mensaje;
+    private string? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        TokenStorage.Changed += OnAuthChanged;
+        AuthBridge.Ready += OnAuthChanged;
+        await CargarAsync();
+    }
+
+    private async void OnAuthChanged() => await InvokeAsync(CargarAsync);
+
+    private async Task CargarAsync()
+    {
+        _listo = false;
+        for (var i = 0; i < 60 && !TokenStorage.IsAuthenticated; i++)
+            await Task.Delay(100);
+
+        if (!AppRoles.IsAdministrador(TokenStorage.Current?.Rol))
+        {
+            _listo = true;
+            StateHasChanged();
+            return;
+        }
+
+        try
+        {
+            _profesores = (await Catalogo.GetProfesoresAsync()).ToList();
+            _materias = (await Catalogo.GetMateriasAsync()).ToList();
+        }
+        catch (Exception ex) { _error = ex.Message; }
+
+        _listo = true;
+    }
+
+    private void Editar(ProfesorModel p)
+    {
+        _editId = p.Id;
+        _form = new FormModel { Nombre = p.Nombre };
+        _modo = Modo.Editar;
+    }
+
+    private async Task Guardar()
+    {
+        _error = null;
+        _mensaje = null;
+        try
+        {
+            if (_modo == Modo.Crear)
+            {
+                var creado = await Catalogo.CreateProfesorAsync(new CreateProfesorModel(_form.Nombre));
+                if (creado is null) { _error = "No se pudo crear el profesor."; return; }
+                _mensaje = "Profesor creado.";
+            }
+            else if (_editId.HasValue)
+            {
+                var ok = await Catalogo.UpdateProfesorAsync(_editId.Value, new UpdateProfesorModel(_form.Nombre));
+                if (ok is null) { _error = "No se pudo actualizar."; return; }
+                _mensaje = "Profesor actualizado.";
+            }
+            _modo = Modo.Lista;
+            await CargarAsync();
+        }
+        catch (Exception ex) { _error = ex.Message; }
+    }
+
+    private async Task Eliminar(int id)
+    {
+        try
+        {
+            await Catalogo.DeleteProfesorAsync(id);
+            _mensaje = "Profesor eliminado.";
+            await CargarAsync();
+        }
+        catch (Exception ex) { _error = ex.Message; }
+    }
+
+    private void Cancelar() { _modo = Modo.Lista; _editId = null; _form = new(); }
+
+    public void Dispose()
+    {
+        TokenStorage.Changed -= OnAuthChanged;
+        AuthBridge.Ready -= OnAuthChanged;
+    }
+
+    private sealed class FormModel
+    {
+        public string Nombre { get; set; } = string.Empty;
+    }
+}
